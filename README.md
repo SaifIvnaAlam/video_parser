@@ -10,6 +10,9 @@ This application now uses **AssemblyAI Speech-to-Text API** to:
 - Calculate **real accuracy scores** based on actual audio content
 - Provide detailed mismatch analysis with transcribed text
 
+## How it works
+![My App Screenshot](image.png)
+
 ## Features
 
 - **Real Audio Processing** - FFmpeg audio extraction and segmentation
@@ -150,15 +153,6 @@ This feature is perfect for:
 - **Enhanced UI** with video player integration
 - **Real-time processing** progress updates
 
-## Deployment
-
-This application can be deployed to:
-- **Heroku** (Procfile included)
-- **Railway**
-- **DigitalOcean App Platform**
-- Any Node.js hosting service
-
-**Important**: Set your AssemblyAI API key in the configuration file or as an environment variable on your hosting platform.
 
 ## License
 
