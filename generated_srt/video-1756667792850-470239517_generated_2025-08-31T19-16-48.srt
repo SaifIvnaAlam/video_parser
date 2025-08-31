@@ -1,0 +1,28 @@
+1
+00:00:01,000 --> 00:00:04,000
+Myself for the taste of the.
+
+2
+00:00:05,000 --> 00:00:08,000
+[No speech detected]
+
+3
+00:00:09,000 --> 00:00:12,000
+[Transcription failed: This is a sample subtitle file for testing.]
+
+4
+00:00:13,000 --> 00:00:16,000
+[Transcription failed: You can upload this file to test the application.]
+
+5
+00:00:17,000 --> 00:00:20,000
+[Transcription failed: The system will analyze each subtitle entry.]
+
+6
+00:00:21,000 --> 00:00:24,000
+[Transcription failed: And provide accuracy scores for each one.]
+
+7
+00:00:25,000 --> 00:00:28,000
+[Transcription failed: Thank you for using our subtitle parser.]
+

@@ -1,0 +1,862 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Next Venture Subtitle Accuracy Parser </title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1f2937;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding: 40px 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .header h1 {
+            color: #6366f1;
+            margin-bottom: 15px;
+            font-size: 2.5rem;
+            font-weight: 800;
+        }
+
+        .upload-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .file-input-container {
+            position: relative;
+            border: 3px dashed #e5e7eb;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            background: #f8fafc;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+
+        .file-input-container:hover {
+            border-color: #6366f1;
+            background: #f0f9ff;
+            transform: translateY(-2px);
+        }
+
+        .file-input-container.dragover {
+            border-color: #6366f1;
+            background: #f0f9ff;
+            transform: scale(1.02);
+        }
+
+        .file-input {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-icon {
+            font-size: 3rem;
+            color: #6366f1;
+            margin-bottom: 15px;
+        }
+
+        .file-input-text {
+            color: #6b7280;
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+
+        .file-input-hint {
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        .loading h3 {
+            color: #6366f1;
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1, #10b981);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2563eb;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .results {
+            display: none;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .results h2 {
+            color: #6366f1;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2rem;
+            font-weight: 800;
+        }
+
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 25px;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 15px;
+            border: 2px solid #e5e7eb;
+            transition: all 0.3s ease;
+        }
+
+        .summary-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .summary-item h3 {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-item .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .accuracy-high { color: #059669; }
+        .accuracy-medium { color: #d97706; }
+        .accuracy-low { color: #dc2626; }
+
+        .subtitles-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .subtitles-table th,
+        .subtitles-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .subtitles-table th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        .subtitles-table tr:hover {
+            background: #f9fafb;
+        }
+
+        .match-yes {
+            color: #059669;
+            font-weight: 600;
+        }
+
+        .match-no {
+            color: #dc2626;
+            font-weight: 600;
+        }
+
+        .transcribed-text {
+            max-width: 200px;
+            word-wrap: break-word;
+            font-size: 14px;
+            color: #6b7280;
+            font-style: italic;
+        }
+
+        .error {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #fecaca;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            background: #f0fdf4;
+            color: #059669;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #bbf7d0;
+            margin-bottom: 20px;
+        }
+
+        .generated-srt-section {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .generated-srt-section h3 {
+            color: #0369a1;
+            margin-bottom: 15px;
+        }
+
+        .generated-srt-section p {
+            color: #0c4a6e;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .download-section {
+            margin-top: 20px;
+        }
+
+        .download-btn {
+            display: inline-block;
+            background: #0ea5e9;
+            color: white;
+            text-decoration: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: background-color 0.2s;
+            margin-bottom: 15px;
+        }
+
+        .download-btn:hover {
+            background: #0284c7;
+        }
+
+        .download-info {
+            font-size: 14px;
+            color: #64748b;
+            margin: 0;
+        }
+
+        .download-info code {
+            background: #e2e8f0;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+        }
+
+        .subtitles-section h3 {
+            color: #6366f1;
+            margin: 40px 0 25px;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .subtitles-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .subtitles-table th,
+        .subtitles-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: top;
+        }
+
+        .subtitles-table th {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .subtitles-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .subtitles-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .subtitle-id {
+            font-weight: 600;
+            color: #6366f1;
+            text-align: center;
+            width: 50px;
+        }
+
+        .subtitle-time {
+            width: 120px;
+        }
+
+        .time-range {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.8rem;
+        }
+
+        .start-time, .end-time {
+            color: #6b7280;
+        }
+
+        .separator {
+            color: #9ca3af;
+            font-size: 0.7rem;
+            text-align: center;
+        }
+
+        .subtitle-text {
+            max-width: 200px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            color: #374151;
+        }
+
+        .transcribed-text {
+            max-width: 200px;
+            font-size: 0.85rem;
+            color: #6b7280;
+            font-style: italic;
+            line-height: 1.4;
+        }
+
+        .accuracy-cell {
+            width: 100px;
+            text-align: center;
+        }
+
+        .accuracy-bar {
+            width: 100%;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 5px;
+        }
+
+        .accuracy-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981);
+            transition: width 0.3s ease;
+            border-radius: 3px;
+        }
+
+        .accuracy-text {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #6b7280;
+        }
+
+        .status-cell {
+            width: 60px;
+            text-align: center;
+        }
+
+        .match-yes {
+            color: #10b981;
+            font-size: 1.1rem;
+        }
+
+        .match-no {
+            color: #ef4444;
+            font-size: 1.1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px solid #e5e7eb;
+        }
+
+        .stat-card h4 {
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #1f2937;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>NextVenture Video Subtitle Accuracy Parser</h1>
+            <p>Real-time subtitle accuracy analysis using speech-to-text technology</p>
+        </div>
+
+        <div class="upload-section">
+            <h2><i class="fas fa-upload"></i> Upload Files for Analysis</h2>
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label for="videoFile">
+                        <i class="fas fa-video"></i> Video File (MP4, AVI, MOV, etc.)
+                    </label>
+                    <div class="file-input-container" onclick="document.getElementById('videoFile').click()">
+                        <input type="file" id="videoFile" name="video" class="file-input" accept="video/*" required>
+                        <div class="file-input-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="file-input-text">Click to select video file</div>
+                        <div class="file-input-hint">Supports MP4, AVI, MOV, MKV and more</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="subtitleFile">
+                        <i class="fas fa-closed-captioning"></i> Subtitle File (.srt or .txt)
+                    </label>
+                    <div class="file-input-container" onclick="document.getElementById('subtitleFile').click()">
+                        <input type="file" id="subtitleFile" name="subtitles" class="file-input" accept=".srt,.txt" required>
+                        <div class="file-input-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="file-input-text">Click to select subtitle file</div>
+                        <div class="file-input-hint">Supports SRT and TXT formats</div>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <i class="fas fa-play"></i> Analyze Subtitle Accuracy
+                </button>
+            </form>
+        </div>
+
+        <div class="loading" id="loading">
+            <h3><i class="fas fa-cog fa-spin"></i> Processing Your Files</h3>
+            <div class="spinner"></div>
+            <p><i class="fas fa-video"></i> Extracting audio from video...</p>
+            <p><i class="fas fa-microphone"></i> Transcribing speech with AI...</p>
+            <p><i class="fas fa-chart-line"></i> Analyzing subtitle accuracy...</p>
+            <p><i class="fas fa-clock"></i> This may take a few minutes depending on file size.</p>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div class="results" id="results"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        // WebSocket connection for real-time updates
+        let ws = null;
+        let progressUpdates = [];
+        
+        function connectWebSocket() {
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            const wsUrl = `${protocol}//${window.location.host}`;
+            
+            ws = new WebSocket(wsUrl);
+            
+            ws.onopen = () => {
+                console.log('🔌 WebSocket connected');
+            };
+            
+            ws.onmessage = (event) => {
+                try {
+                    const message = JSON.parse(event.data);
+                    handleWebSocketMessage(message);
+                } catch (error) {
+                    console.error('Error parsing WebSocket message:', error);
+                }
+            };
+            
+            ws.onclose = () => {
+                console.log('🔌 WebSocket disconnected');
+                // Try to reconnect after 5 seconds
+                setTimeout(connectWebSocket, 5000);
+            };
+            
+            ws.onerror = (error) => {
+                console.error('WebSocket error:', error);
+            };
+        }
+        
+        function handleWebSocketMessage(message) {
+            switch (message.type) {
+                case 'subtitle_progress':
+                    updateSubtitleProgress(message.data);
+                    break;
+                case 'status':
+                    updateStatus(message.data.message);
+                    break;
+            }
+        }
+        
+        function updateSubtitleProgress(data) {
+            // Store progress update
+            progressUpdates.push(data);
+            
+            // Update progress bar
+            const progress = (data.current / data.total) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            
+            // Update loading text
+            const loadingText = document.querySelector('.loading p:nth-child(3)');
+            if (loadingText) {
+                loadingText.innerHTML = `<i class="fas fa-microphone"></i> Processing subtitle ${data.current}/${data.total}: ${data.text}`;
+            }
+            
+            // Update status
+            updateStatus(data.status);
+        }
+        
+        function updateStatus(message) {
+            const statusElement = document.querySelector('.loading p:nth-child(4)');
+            if (statusElement) {
+                statusElement.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
+            }
+        }
+        
+        // Connect WebSocket when page loads
+        connectWebSocket();
+
+        // File selection handlers
+        document.getElementById('videoFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const container = e.target.parentElement;
+                container.querySelector('.file-input-text').textContent = `Selected: ${file.name}`;
+                container.querySelector('.file-input-hint').textContent = `Size: ${(file.size / (1024 * 1024)).toFixed(2)} MB`;
+                container.style.borderColor = '#10b981';
+                container.style.background = '#f0fdf4';
+            }
+        });
+
+        document.getElementById('subtitleFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const container = e.target.parentElement;
+                container.querySelector('.file-input-text').textContent = `Selected: ${file.name}`;
+                container.querySelector('.file-input-hint').textContent = `Size: ${(file.size / 1024).toFixed(2)} KB`;
+                container.style.borderColor = '#10b981';
+                container.style.background = '#f0fdf4';
+            }
+        });
+
+        // Form submission
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData();
+            const videoFile = document.getElementById('videoFile').files[0];
+            const subtitleFile = document.getElementById('subtitleFile').files[0];
+
+            if (!videoFile || !subtitleFile) {
+                showError('Please select both video and subtitle files.');
+                return;
+            }
+
+            formData.append('video', videoFile);
+            formData.append('subtitles', subtitleFile);
+
+            // Show loading state
+            loading.style.display = 'block';
+            results.style.display = 'none';
+            submitBtn.disabled = true;
+
+            // Reset progress bar
+            document.getElementById('progressFill').style.width = '0%';
+            
+            // Clear previous progress updates
+            progressUpdates = [];
+
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Complete progress bar
+                    document.getElementById('progressFill').style.width = '100%';
+                    setTimeout(() => {
+                        displayResults(result.data);
+                    }, 500);
+                } else {
+                    showError(result.error || 'An error occurred during analysis.');
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            } finally {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+            }
+        });
+
+        function showError(message) {
+            results.innerHTML = `<div class="error">${message}</div>`;
+            results.style.display = 'block';
+        }
+
+        function displayResults(data) {
+            const accuracyClass = data.overallAccuracy >= 0.8 ? 'accuracy-high' : 
+                                data.overallAccuracy >= 0.6 ? 'accuracy-medium' : 'accuracy-low';
+
+            // Calculate additional statistics
+            const failedTranscriptions = data.subtitles.filter(sub => 
+                sub.transcribedText === '[Transcription failed]' || 
+                sub.transcribedText === '[Audio processing failed]'
+            ).length;
+
+            results.innerHTML = `
+                <h2><i class="fas fa-chart-line"></i> Analysis Results</h2>
+                
+                <div class="summary">
+                    <div class="summary-item">
+                        <h3><i class="fas fa-video"></i> Video File</h3>
+                        <div class="value">${data.videoFile}</div>
+                    </div>
+                    <div class="summary-item">
+                        <h3><i class="fas fa-closed-captioning"></i> Subtitle File</h3>
+                        <div class="value">${data.subtitleFile}</div>
+                    </div>
+                    <div class="summary-item">
+                        <h3><i class="fas fa-list-ol"></i> Total Subtitles</h3>
+                        <div class="value">${data.totalSubtitles}</div>
+                    </div>
+                    <div class="summary-item">
+                        <h3><i class="fas fa-check-circle"></i> Matched Subtitles</h3>
+                        <div class="value">${data.matchedSubtitles}/${data.totalSubtitles}</div>
+                    </div>
+                    <div class="summary-item">
+                        <h3><i class="fas fa-percentage"></i> Overall Accuracy</h3>
+                        <div class="value ${accuracyClass}">${(data.overallAccuracy * 100).toFixed(1)}%</div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h4><i class="fas fa-times-circle"></i> Failed Transcriptions</h4>
+                        <div class="value">${failedTranscriptions}</div>
+                    </div>
+                    <div class="stat-card">
+                        <h4><i class="fas fa-clock"></i> Processing Time</h4>
+                        <div class="value">${data.processingTime ? 'Completed' : 'N/A'}</div>
+                    </div>
+                </div>
+
+                ${data.generatedSrtFile ? `
+                <div class="generated-srt-section">
+                    <h3><i class="fas fa-file-download"></i> Generated SRT File</h3>
+                    <p>We've created a new SRT file from the actual audio transcription. This file contains the real speech-to-text results with proper timestamps.</p>
+                    <div class="download-section">
+                        <a href="/api/download-srt/${data.generatedSrtFile}" class="download-btn" download>
+                            <i class="fas fa-download"></i> Download Generated SRT: ${data.generatedSrtFile}
+                        </a>
+                        <p class="download-info">This SRT file is saved in the <code>generated_srt</code> directory and contains the actual transcribed audio text.</p>
+                    </div>
+                </div>
+                ` : ''}
+
+                <div class="subtitles-section">
+                    <h3><i class="fas fa-table"></i> Subtitle Analysis</h3>
+                    <div class="table-container">
+                        <table class="subtitles-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Time</th>
+                                    <th>Subtitle</th>
+                                    <th>AI Transcription</th>
+                                    <th>Accuracy</th>
+                                    <th>Match</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.subtitles.map(sub => {
+                                    const statusClass = sub.isMatch ? 'match-yes' : 'match-no';
+                                    const statusText = sub.isMatch ? '✓ Match' : '✗ Mismatch';
+                                    const statusIcon = sub.isMatch ? 'check-circle' : 'times-circle';
+                                    
+                                    return `
+                                        <tr>
+                                            <td class="subtitle-id">${sub.id}</td>
+                                            <td class="subtitle-time">
+                                                <div class="time-range">
+                                                    <span class="start-time">${sub.startTime}</span>
+                                                    <span class="separator">→</span>
+                                                    <span class="end-time">${sub.endTime}</span>
+                                                </div>
+                                            </td>
+                                            <td class="subtitle-text">${sub.text}</td>
+                                            <td class="transcribed-text">${sub.transcribedText || 'No transcription'}</td>
+                                            <td class="accuracy-cell">
+                                                <div class="accuracy-bar">
+                                                    <div class="accuracy-fill" style="width: ${(sub.accuracy * 100)}%"></div>
+                                                </div>
+                                                <span class="accuracy-text">${(sub.accuracy * 100).toFixed(0)}%</span>
+                                            </td>
+                                            <td class="status-cell">
+                                                <span class="${statusClass}">
+                                                    <i class="fas fa-${statusIcon}"></i>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    `;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+
+            results.style.display = 'block';
+        }
+    </script>
+</body>
+<footer style="text-align: center; padding: 1rem; font-size: 0.9rem; color: #fbfafa;">
+  Made with ❤️ by Sif Ivna Alam
+</footer>
+</html>
